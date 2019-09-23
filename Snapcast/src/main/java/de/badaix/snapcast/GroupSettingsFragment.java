@@ -21,17 +21,17 @@ package de.badaix.snapcast;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.List;
 
 import de.badaix.snapcast.control.json.Client;
 import de.badaix.snapcast.control.json.Group;
@@ -44,12 +44,12 @@ import de.badaix.snapcast.control.json.Stream;
 
 public class GroupSettingsFragment extends PreferenceFragment {
 
-    //private static final String TAG = "GroupSettingsFragment";
+    private static final String TAG = "GroupSettingsFragment";
 
     private ListPreference prefStreams;
     private Group group = null;
-    private ServerStatus serverStatus = null;
-    private PreferenceCategory prefCatClients = null;
+    private ServerStatus serverStatus;
+    private PreferenceCategory prefCatClients;
 
     private String oldClients = "";
     private String oldStream = "";
@@ -69,10 +69,10 @@ public class GroupSettingsFragment extends PreferenceFragment {
             group = new Group(new JSONObject(bundle.getString("group")));
             serverStatus = new ServerStatus(new JSONObject(bundle.getString("serverStatus")));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Creating new group and server status", e);
         }
 
-        final ArrayList<Stream> streams = serverStatus.getStreams();
+        final List<Stream> streams = serverStatus.getStreams();
         final CharSequence[] streamNames = new CharSequence[streams.size()];
         final CharSequence[] streamIds = new CharSequence[streams.size()];
         for (int i = 0; i < streams.size(); ++i) {
@@ -92,20 +92,17 @@ public class GroupSettingsFragment extends PreferenceFragment {
             }
         }
 
-        prefStreams.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                for (int i = 0; i < streams.size(); ++i) {
-                    if (streamIds[i].equals(newValue)) {
-                        prefStreams.setTitle(streamNames[i]);
+        prefStreams.setOnPreferenceChangeListener((preference, newValue) -> {
+            for (int i = 0; i < streams.size(); ++i) {
+                if (streamIds[i].equals(newValue)) {
+                    prefStreams.setTitle(streamNames[i]);
 //                        client.getConfig().setStream(streamIds[i].toString());
-                        prefStreams.setValueIndex(i);
-                        break;
-                    }
+                    prefStreams.setValueIndex(i);
+                    break;
                 }
-
-                return false;
             }
+
+            return false;
         });
 
 
@@ -121,12 +118,7 @@ public class GroupSettingsFragment extends PreferenceFragment {
                 allClients.add(checkBoxPref);
             }
         }
-        Collections.sort(allClients, new Comparator<CheckBoxPreference>() {
-            @Override
-            public int compare(CheckBoxPreference lhs, CheckBoxPreference rhs) {
-                return lhs.getTitle().toString().compareToIgnoreCase(rhs.getTitle().toString());
-            }
-        });
+        Collections.sort(allClients, (lhs, rhs) -> lhs.getTitle().toString().compareToIgnoreCase(rhs.getTitle().toString()));
         for (CheckBoxPreference pref : allClients)
             prefCatClients.addPreference(pref);
 

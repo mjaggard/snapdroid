@@ -65,11 +65,12 @@
                         android:id="@+id/tvStreamName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
+                        android:ellipsize="marquee"
                         android:fadingEdge="horizontal"
                         android:paddingBottom="1dp"
                         android:paddingLeft="5dp"
                         android:paddingTop="2dp"
+                        android:singleLine="true"
                         android:text="Stream name"
                         android:textAppearance="?android:attr/textAppearanceMedium"/>
 

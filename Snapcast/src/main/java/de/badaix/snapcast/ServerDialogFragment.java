@@ -24,8 +24,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -39,6 +42,8 @@ import de.badaix.snapcast.utils.NsdHelper;
  */
 public class ServerDialogFragment extends DialogFragment implements View.OnClickListener {
 
+    private static final String TAG = "ServerDialogFragment";
+
     private Button btnScan;
     private EditText editHost;
     private EditText editStreamPort;
@@ -48,7 +53,8 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
     private int streamPort = 1704;
     private int controlPort = 1705;
     private boolean autoStart = false;
-    private ServerDialogListener listener = null;
+    private ServerDialogListener listener;
+    private final NsdHelper nsdHelper = new NsdHelper();
 
     public void setListener(ServerDialogListener listener) {
         this.listener = listener;
@@ -82,7 +88,7 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
                             streamPort = Integer.parseInt(editStreamPort.getText().toString());
                             controlPort = Integer.parseInt(editControlPort.getText().toString());
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            Log.wtf(TAG, "Reading port numbers", e);
                         }
                         if (listener != null) {
                             listener.onHostChanged(host, streamPort, controlPort);
@@ -102,12 +108,19 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        NsdHelper.getInstance(getContext()).startListening("_snapcast._tcp.", "Snapcast", new NsdHelper.NsdHelperListener() {
+        nsdHelper.startListening("_snapcast._tcp.", "Snapcast", new NsdHelper.NsdHelperListener() {
             @Override
             public void onResolved(NsdHelper nsdHelper, NsdServiceInfo serviceInfo) {
                 setHost(serviceInfo.getHost().getCanonicalHostName(), serviceInfo.getPort(), serviceInfo.getPort() + 1);
+                nsdHelper.stopListening();
             }
-        });
+        }, getContext());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        nsdHelper.stopListening();
     }
 
     @Override
@@ -120,25 +133,24 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
     }
 
     private void update() {
-        if (this.getActivity() == null)
-            return;
-
         try {
-            this.getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        editHost.setText(host);
-                        editStreamPort.setText(Integer.toString(streamPort));
-                        editControlPort.setText(Integer.toString(controlPort));
-                        checkBoxAutoStart.setChecked(autoStart);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            Runnable runnable = () -> {
+                try {
+                    editHost.setText(host);
+                    editStreamPort.setText(Integer.toString(streamPort));
+                    editControlPort.setText(Integer.toString(controlPort));
+                    checkBoxAutoStart.setChecked(autoStart);
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Setting UI to current values, currently on UI thread", e);
                 }
-            });
+            };
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(runnable);
+            } else {
+                new Handler(Looper.getMainLooper()).post(runnable);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting UI to current values in a thread", e);
         }
     }
 

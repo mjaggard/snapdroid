@@ -1,36 +1,94 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
-
-    defaultConfig {
-        applicationId "de.badaix.snapcast"
-        minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1501
-        versionName '0.15.1'
-        multiDexEnabled true
-        vectorDrawables.useSupportLibrary = true
+    signingConfigs {
+        config {
+            keyAlias 'snapcast'
+            keyPassword 'Passw0rdSnapCast'
+            storeFile file('/home/mat/dev/keystore-android')
+            storePassword 'SCPassw0rd'
+        }
     }
+    compileSdkVersion 25
+
+    def versionPropsFile = file('version.properties')
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def name = versionProps['VERSION_NAME']
+        def buildNumber = versionProps['VERSION_NAME']
+        name += "." + buildNumber
+        def code = versionProps['VERSION_CODE'].toInteger()
+
+        defaultConfig {
+            applicationId 'uk.org.jaggard.snapcast'
+            versionName name
+            versionCode code
+            minSdkVersion 16
+            targetSdkVersion 25
+            multiDexEnabled true
+            signingConfig signingConfigs.config
+        }
+    }
+    else {
+        throw new RuntimeException("Could not read version.properties!")
+    }
+
+    increaseVersionCode()
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
-    lintOptions{
+    lintOptions {
         disable 'MissingTranslation'
     }
-    buildToolsVersion = '29.0.2'
+    productFlavors {
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.12'
-    // https://dl.google.com/dl/android/maven2/index.html
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:support-v4:28.0.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:cardview-v7:25.4.0'
+    compile 'com.android.support:support-v4:25.4.0'
+    compile 'com.android.support:customtabs:25.4.0'
+
     //    compile 'com.android.support:recyclerview-v7:23.1.1'
-    implementation 'com.android.support:design:28.0.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.google.android.gms:play-services-ads:11.8.0'
+}
+
+def increaseVersionCode() {
+    gradle.taskGraph.whenReady { taskGraph ->
+        if (taskGraph.hasTask("assembleRelease")) {
+            /* when run release task */
+            def versionPropsFile = file('version.properties')
+
+            if (versionPropsFile.canRead()) {
+                def Properties versionProps = new Properties()
+
+                versionProps.load(new FileInputStream(versionPropsFile))
+
+                def build = versionProps['VERSION_BUILD'].toInteger() + 1
+                def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+                versionProps['VERSION_BUILD'] = build.toString()
+                versionProps['VERSION_CODE'] = code.toString()
+                versionProps.store(versionPropsFile.newWriter(), null)
+            } else {
+                throw new RuntimeException("Could not read version.properties!")
+            }
+        }
+    }
 }

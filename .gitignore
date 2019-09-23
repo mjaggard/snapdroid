@@ -80,3 +80,12 @@ lint/tmp/
 # lint/reports/
 
 Snapcast/release/output.json
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+/.idea/caches/
+.DS_Store
+/build
+/captures
+*.orig

@@ -32,7 +32,9 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".SnapclientService"/>
+        <service android:name=".SnapClientService"/>
+        <service android:name=".SnapServerService"/>
+
 
         <!-- android:theme="@style/Theme.AppCompat.Light.DialogWhenLarge" -->
         <activity

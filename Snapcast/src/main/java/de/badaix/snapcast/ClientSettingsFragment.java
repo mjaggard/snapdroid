@@ -24,6 +24,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,8 +35,10 @@ import de.badaix.snapcast.control.json.Client;
  * Created by johannes on 11.01.16.
  */
 public class ClientSettingsFragment extends PreferenceFragment {
-    private Client client = null;
-    private Client clientOriginal = null;
+    private static final String TAG = "ClientSettingsFragment";
+
+    private Client client;
+    private Client clientOriginal;
     private EditTextPreference prefName;
     private EditTextPreference prefLatency;
     private Preference prefMac;
@@ -55,29 +58,26 @@ public class ClientSettingsFragment extends PreferenceFragment {
         try {
             client = new Client(new JSONObject(bundle.getString("client")));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Creating new client", e);
         }
         clientOriginal = new Client(client.toJson());
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.client_preferences);
         prefName = (EditTextPreference) findPreference("pref_client_name");
-        prefName.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                prefName.setSummary((String) newValue);
-                client.setName((String) newValue);
-                return true;
-            }
+        prefName.setOnPreferenceChangeListener((preference, newValue) -> {
+            prefName.setSummary((String) newValue);
+            client.setName((String) newValue);
+            return true;
         });
 
-        prefMac = (Preference) findPreference("pref_client_mac");
-        prefId = (Preference) findPreference("pref_client_id");
-        prefIp = (Preference) findPreference("pref_client_ip");
-        prefHost = (Preference) findPreference("pref_client_host");
-        prefOS = (Preference) findPreference("pref_client_os");
-        prefVersion = (Preference) findPreference("pref_client_version");
-        prefLastSeen = (Preference) findPreference("pref_client_last_seen");
+        prefMac = findPreference("pref_client_mac");
+        prefId = findPreference("pref_client_id");
+        prefIp = findPreference("pref_client_ip");
+        prefHost = findPreference("pref_client_host");
+        prefOS = findPreference("pref_client_os");
+        prefVersion = findPreference("pref_client_version");
+        prefLastSeen = findPreference("pref_client_last_seen");
         prefLatency = (EditTextPreference) findPreference("pref_client_latency");
         prefLatency.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
@@ -101,7 +101,7 @@ public class ClientSettingsFragment extends PreferenceFragment {
         return clientOriginal;
     }
 
-    public void update() {
+    private void update() {
         if (client == null)
             return;
         prefName.setSummary(client.getConfig().getName());
