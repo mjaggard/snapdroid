@@ -77,7 +77,7 @@ public class SnapServerService extends SnapService {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "SnapcastWakeLock");
+            wakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "Snapcast:ServerWakeLock");
             wakeLock.acquire();
 
             WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
