@@ -5,11 +5,11 @@ android {
         config {
             keyAlias 'snapcast'
             keyPassword 'Passw0rdSnapCast'
-            storeFile file('/home/mat/dev/keystore-android')
+            storeFile file('../keystore-android')
             storePassword 'SCPassw0rd'
         }
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     def versionPropsFile = file('version.properties')
     if (versionPropsFile.canRead()) {
@@ -27,7 +27,7 @@ android {
             versionName name
             versionCode code
             minSdkVersion 16
-            targetSdkVersion 28
+            targetSdkVersion 29
             multiDexEnabled true
             signingConfig signingConfigs.config
         }
@@ -59,13 +59,13 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:28.0.0'
-    compile 'com.android.support:cardview-v7:28.0.0'
-    compile 'com.android.support:support-v4:28.0.0'
-    compile 'com.android.support:customtabs:28.0.0'
+    compile 'androidx.appcompat:appcompat:1.0.0'
+    compile 'androidx.cardview:cardview:1.0.0'
+    compile 'androidx.legacy:legacy-support-v4:1.0.0'
+    compile 'androidx.browser:browser:1.0.0'
 
     //    compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.android.support:design:28.0.0'
+    compile 'com.google.android.material:material:1.0.0'
     compile 'com.google.android.gms:play-services-ads:11.8.0'
 }
 

@@ -21,8 +21,9 @@ package de.badaix.snapcast;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public class SnapClientService extends SnapService {
     @Override
     protected NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop) {
         String host = intent.getStringExtra(EXTRA_HOST);
-        return new NotificationCompat.Builder(this)
+        return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_media_play)
                 .setTicker(getText(R.string.ticker_text))
                 .setContentTitle(getText(R.string.notification_title))

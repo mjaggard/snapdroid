@@ -89,3 +89,4 @@ Snapcast/release/output.json
 /build
 /captures
 *.orig
+keystore-android

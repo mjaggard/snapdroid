@@ -19,17 +19,20 @@
 package de.badaix.snapcast;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -43,6 +46,7 @@ public abstract class SnapService extends Service {
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_STOP = "ACTION_STOP";
     private static final String TAG = "SnapService";
+    protected static final String NOTIFICATION_CHANNEL_ID = "de.badaix.snapcast.background";
     private final IBinder mBinder = new LocalBinder();
     protected Process process;
     protected PowerManager.WakeLock wakeLock;
@@ -74,6 +78,7 @@ public abstract class SnapService extends Service {
             stopIntent.setAction(ACTION_STOP);
             PendingIntent piStop = PendingIntent.getService(this, 0, stopIntent, 0);
 
+            setupChannel();
             NotificationCompat.Builder builder = createStopNotificationBuilder(intent, piStop);
 
             Intent resultIntent = new Intent(this, MainActivity.class);
@@ -119,6 +124,18 @@ public abstract class SnapService extends Service {
             return START_STICKY;
         }
         return START_NOT_STICKY;
+    }
+
+    private void setupChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelName = "SnapCast";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+        }
     }
 
     protected abstract void start(Intent intent);
