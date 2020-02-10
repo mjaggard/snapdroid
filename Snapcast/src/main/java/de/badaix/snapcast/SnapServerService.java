@@ -73,24 +73,24 @@ public class SnapServerService extends SnapService {
             //https://code.google.com/p/android/issues/detail?id=22763
             if (running)
                 return;
-            File binary = new File(getFilesDir(), "snapserver");
+            File binary = new File(getApplicationInfo().nativeLibraryDir, "snapserver.so");
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "Snapcast:ServerWakeLock");
-            wakeLock.acquire();
+            wakeLock.acquire(24 * 60 * 60 * 1000);
 
             WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             wifiWakeLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "SnapcastWifiWakeLock");
             wifiWakeLock.acquire();
-            String loc = getFilesDir().getAbsolutePath();
+            String loc = new File(getApplicationInfo().nativeLibraryDir).getAbsolutePath();
 
             String spotifyUsername = intent.getStringExtra(SPOTIFY_USERNAME);
             String spotifyPassword = intent.getStringExtra(SPOTIFY_PASSWORD);
 
             File cacheDir = new File(getCacheDir(), "librespot");
             cacheDir.mkdirs();
-            String spotifyString = "spotify:///" + loc + "/librespot?name=Spotify&username=" + spotifyUsername + "&password=" + spotifyPassword + "&devicename=Snapcast&bitrate=320&cache=" + cacheDir.getAbsolutePath();
+            String spotifyString = "spotify:///" + loc + "/librespot.so?name=Spotify&username=" + spotifyUsername + "&password=" + spotifyPassword + "&devicename=Snapcast&bitrate=320&cache=" + cacheDir.getAbsolutePath();
 
             //launchLibReSpot(intent);
 
@@ -115,7 +115,7 @@ public class SnapServerService extends SnapService {
     private void launchLibReSpot(Intent intent) {
         File cacheDir = new File(getCacheDir(), "librespot");
         cacheDir.mkdirs();
-        File binary = new File(getFilesDir(), "librespot");
+        File binary = new File(getApplicationInfo().nativeLibraryDir, "librespot.so");
         ProcessBuilder pb = new ProcessBuilder();
         try {
             String spotifyUsername = intent.getStringExtra(SPOTIFY_USERNAME);

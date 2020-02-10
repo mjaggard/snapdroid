@@ -23,8 +23,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -67,7 +65,6 @@ import de.badaix.snapcast.control.json.Stream;
 import de.badaix.snapcast.control.json.Volume;
 import de.badaix.snapcast.utils.NsdHelper;
 import de.badaix.snapcast.utils.Settings;
-import de.badaix.snapcast.utils.Setup;
 import uk.org.jaggard.snapcast.AdDetails;
 
 public class MainActivity extends AppCompatActivity implements GroupItem.GroupItemListener, RemoteControl.RemoteControlListener, SnapService.LogListener, NsdHelper.NsdHelperListener {
@@ -76,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private static final int GROUP_PROPERTIES_REQUEST = 2;
     public static final String TAG = "Main";
     private static final String SERVICE_NAME = "Snapcast";// #2";
-    private static final String[] BINARIES = new String[]{"snapclient", "snapserver", "librespot"};
     private boolean clientBound;
     private MenuItem miClientStartStop;
     private boolean serverBound;
@@ -187,41 +183,13 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
         setActionbarSubtitle("Host: no Snapserver found");
 
-        new Thread(() -> {
-            for (String binaryName : BINARIES) {
-                Log.d(TAG, "copying " + binaryName);
-                Setup.copyBinAsset(MainActivity.this, binaryName, binaryName);
-                Log.d(TAG, "done copying " + binaryName);
-            }
-        }).start();
-
-        final RelativeLayout adContainer = (RelativeLayout) findViewById(R.id.adView);
+        final RelativeLayout adContainer = findViewById(R.id.adView);
         AdView mAdView = new AdView(this);
         mAdView.setAdSize(AdSize.LARGE_BANNER);
         mAdView.setAdUnitId(AdDetails.AD_UNIT_ID);
         adContainer.addView(mAdView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-    }
-
-    public void checkFirstRun() {
-        PackageInfo pInfo;
-        try {
-            pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            final int verCode = pInfo.versionCode;
-            int lastRunVersion = new Settings(this).getInt("lastRunVersion", 0);
-            Log.d(TAG, "lastRunVersion: " + lastRunVersion + ", version: " + verCode);
-            if (lastRunVersion < verCode) {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.first_run_title)
-                        .setMessage(R.string.first_run_text)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> new Settings(MainActivity.this).put("lastRunVersion", verCode))
-                        .setCancelable(true)
-                        .show();
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Failure showing first run dialog", e);
-        }
     }
 
     @Override
@@ -455,7 +423,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     public void onResume() {
         super.onResume();
         startRemoteControl();
-        checkFirstRun();
     }
 
     @Override

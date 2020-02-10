@@ -30,6 +30,7 @@ android {
             targetSdkVersion 29
             multiDexEnabled true
             signingConfig signingConfigs.config
+            vectorDrawables.useSupportLibrary = true
         }
     }
     else {
@@ -41,7 +42,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
         }
     }
@@ -54,19 +55,30 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    buildToolsVersion = '29.0.2'
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['../nativeLibs']
+        }
+    }
+
+//    splits {
+//        abi {
+//            enable true
+//            universalApk false
+//        }
+//    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'androidx.appcompat:appcompat:1.0.0'
-    compile 'androidx.cardview:cardview:1.0.0'
-    compile 'androidx.legacy:legacy-support-v4:1.0.0'
-    compile 'androidx.browser:browser:1.0.0'
-
-    //    compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.google.android.material:material:1.0.0'
-    compile 'com.google.android.gms:play-services-ads:11.8.0'
+    //implementation  fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.browser:browser:1.2.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.gms:play-services-ads-lite:18.3.0'
 }
 
 def increaseVersionCode() {
